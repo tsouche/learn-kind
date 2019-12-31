@@ -1,0 +1,172 @@
+
+
+
+
+1) Create a first cluster (single node)!
+
+
+
+
+Just to be cautious, cleanup the .kube directory, and secure it was created 
+with the appropriate rights:
+
+tso@laptop:~$ sudo rm -rf ~/.kube
+tso@laptop:~$ mkdir ~/.kube
+
+Then we trigger the adventure:
+
+tso@laptop:~$ cd /projects/kind/
+tso@laptop:/projects/kind$ kind create cluster --name 'fist-cluster'
+Creating cluster "kind" ...
+ ✓ Ensuring node image (kindest/node:v1.16.3) 🖼
+ ✓ Preparing nodes 📦 
+ ✓ Writing configuration 📜 
+ ✓ Starting control-plane 🕹️ 
+ ✓ Installing CNI 🔌 
+ ✓ Installing StorageClass 💾 
+Set kubectl context to "kind-kind"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-kind
+
+Have a nice day! 👋
+tso@laptop:~$ 
+
+
+Check the status of the cluster:
+
+tso@laptop:/projects/kind$ docker ps
+CONTAINER ID        IMAGE                  COMMAND                  CREATED              STATUS              PORTS                       NAMES
+1c7a8e72d316        kindest/node:v1.16.3   "/usr/local/bin/entr…"   About a minute ago   Up About a minute   127.0.0.1:40689->6443/tcp   kind-control-plane
+
+tso@laptop:/projects/kind$ kubectl cluster-info
+Kubernetes master is running at https://127.0.0.1:40689
+KubeDNS is running at https://127.0.0.1:40689/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+tso@laptop:/projects/kind$ kubectl get nodes
+NAME                 STATUS   ROLES    AGE    VERSION
+kind-control-plane   Ready    master   2m5s   v1.16.3
+
+tso@laptop:/projects/kind$ kind get nodes
+kind-control-plane
+
+tso@laptop:/projects/kind$ kubectl get pods -A -o wide
+NAMESPACE     NAME                                         READY   STATUS    RESTARTS   AGE   IP           NODE                 NOMINATED NODE   READINESS GATES
+kube-system   coredns-5644d7b6d9-hvc57                     1/1     Running   0          68s   10.244.0.2   kind-control-plane   <none>           <none>
+kube-system   coredns-5644d7b6d9-rjsfp                     1/1     Running   0          68s   10.244.0.3   kind-control-plane   <none>           <none>
+kube-system   etcd-kind-control-plane                      1/1     Running   0          10s   172.17.0.2   kind-control-plane   <none>           <none>
+kube-system   kindnet-lcqlx                                1/1     Running   0          67s   172.17.0.2   kind-control-plane   <none>           <none>
+kube-system   kube-apiserver-kind-control-plane            1/1     Running   0          6s    172.17.0.2   kind-control-plane   <none>           <none>
+kube-system   kube-controller-manager-kind-control-plane   1/1     Running   0          4s    172.17.0.2   kind-control-plane   <none>           <none>
+kube-system   kube-proxy-7mbrm                             1/1     Running   0          67s   172.17.0.2   kind-control-plane   <none>           <none>
+kube-system   kube-scheduler-kind-control-plane            1/1     Running   0          28s   172.17.0.2   kind-control-plane   <none>           <none>
+
+As of now, we will NOT use teh kind commands, but we will actually use kubectl 
+only, so as to learn about Kubernetes (and not kind).
+
+
+
+
+
+
+2) Let's deploy a first real cluster
+
+
+
+
+We will model 3 nodes, named "newyear", and we will deploy the dashboard on 
+top of it.
+
+
+
+Create the cluster:
+
+tso@laptop:~$ cd /projects/kind/
+
+tso@laptop:/projects/kind$ kind create cluster --config kind-cluster.yaml --name newyear
+Creating cluster "newyear" ...
+ ✓ Ensuring node image (kindest/node:v1.16.3) 🖼
+ ✓ Preparing nodes 📦 
+ ✓ Writing configuration 📜 
+ ✓ Starting control-plane 🕹️ 
+ ✓ Installing CNI 🔌 
+ ✓ Installing StorageClass 💾 
+ ✓ Joining worker nodes 🚜 
+Set kubectl context to "kind-newyear"
+You can now use your cluster with:
+
+kubectl cluster-info --context kind-newyear
+
+Thanks for using kind! 😊
+tso@laptop:/projects/kind$ 
+
+Check the status of the cluster:
+
+tso@laptop:/projects/kind$ docker ps
+CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                       NAMES
+6d2159c9f0c0        kindest/node:v1.16.3   "/usr/local/bin/entr…"   6 minutes ago       Up 6 minutes        127.0.0.1:45293->6443/tcp   newyear-control-plane
+35caece51846        kindest/node:v1.16.3   "/usr/local/bin/entr…"   6 minutes ago       Up 6 minutes                                    newyear-worker
+3500f511d6e6        kindest/node:v1.16.3   "/usr/local/bin/entr…"   6 minutes ago       Up 6 minutes                                    newyear-worker2
+
+tso@laptop:/projects/kind$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"16", GitVersion:"v1.16.4", GitCommit:"224be7bdce5a9dd0c2fd0d46b83865648e2fe0ba", GitTreeState:"clean", BuildDate:"2019-12-11T12:47:40Z", GoVersion:"go1.12.12", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"16", GitVersion:"v1.16.3", GitCommit:"b3cbbae08ec52a7fc73d334838e18d17e8512749", GitTreeState:"clean", BuildDate:"2019-12-04T07:23:47Z", GoVersion:"go1.12.12", Compiler:"gc", Platform:"linux/amd64"}
+
+tso@laptop:/projects/kind$ kubectl cluster-info
+Kubernetes master is running at https://127.0.0.1:45293
+KubeDNS is running at https://127.0.0.1:45293/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+tso@laptop:/projects/kind$ kubectl get nodes
+NAME                     STATUS   ROLES    AGE     VERSION
+newyear-control-plane   Ready    master   6m57s   v1.16.3
+newyear-worker          Ready    <none>   6m21s   v1.16.3
+newyear-worker2         Ready    <none>   6m21s   v1.16.3
+
+tso@laptop:/projects/kind$ kubectl get pods -A -o wide
+NAMESPACE     NAME                                             READY   STATUS    RESTARTS   AGE     IP           NODE                     NOMINATED NODE   READINESS GATES
+kube-system   coredns-5644d7b6d9-4wgz5                         1/1     Running   0          6m47s   10.244.0.2   newyear-control-plane   <none>           <none>
+kube-system   coredns-5644d7b6d9-sxts4                         1/1     Running   0          6m47s   10.244.0.3   newyear-control-plane   <none>           <none>
+kube-system   etcd-newyear-control-plane                      1/1     Running   0          5m39s   172.17.0.3   newyear-control-plane   <none>           <none>
+kube-system   kindnet-29jlw                                    1/1     Running   0          6m29s   172.17.0.2   newyear-worker2         <none>           <none>
+kube-system   kindnet-kml5d                                    1/1     Running   0          6m29s   172.17.0.4   newyear-worker          <none>           <none>
+kube-system   kindnet-rjjhz                                    1/1     Running   0          6m47s   172.17.0.3   newyear-control-plane   <none>           <none>
+kube-system   kube-apiserver-newyear-control-plane            1/1     Running   0          5m52s   172.17.0.3   newyear-control-plane   <none>           <none>
+kube-system   kube-controller-manager-newyear-control-plane   1/1     Running   0          5m45s   172.17.0.3   newyear-control-plane   <none>           <none>
+kube-system   kube-proxy-2bhzm                                 1/1     Running   0          6m47s   172.17.0.3   newyear-control-plane   <none>           <none>
+kube-system   kube-proxy-5w795                                 1/1     Running   0          6m29s   172.17.0.2   newyear-worker2         <none>           <none>
+kube-system   kube-proxy-p2f8h                                 1/1     Running   0          6m29s   172.17.0.4   newyear-worker          <none>           <none>
+kube-system   kube-scheduler-newyear-control-plane            1/1     Running   0          5m54s   172.17.0.3   newyear-control-plane   <none>           <none>
+
+tso@laptop:/projects/kind$ 
+
+
+
+Here we are: the cluster is deployed with one Master node (named 
+'newyear-control-plane') and two slaves (named 'newyear-worker' and 
+'newyear-worker2').
+
+
+Let's now deploy the dashboard on the cluster.
+Version check: v2.0.0 beta 8 is recommended for cluster v1.16
+
+The shell script called 'dashboard-deployment.sh' will download the proper 
+version of the yaml configuration file and apply it, then create the sample
+user and its rights, so that we can access the dashboard in the browser.
+
+The URL is:
+http://localhost:8080/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+The token appears at the end of the script, to be given to the browser at 
+login.
+
+
+=> the cluster is up and the dashboard is up.
+
+Let's go back to the main tutorial.
+
+
+
