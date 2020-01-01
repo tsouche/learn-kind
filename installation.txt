@@ -22,9 +22,9 @@ echo "Second: install GO v1.13"
 echo "================================================="
 echo
 
-add-apt-repository ppa:longsleep/golang-backports
-apt-get update
-apt-get install -y golang-1.13
+sudo add-apt-repository ppa:longsleep/golang-backports
+sudo apt-get update
+sudo apt-get install -y golang-1.13
 export PATH=$PATH:/usr/lib/go-1.13/bin
 
 
@@ -39,9 +39,10 @@ echo " "
 echo " "
 
 # The binary file is available in the shared directory: copy it in t a bin directory
-cd /project/kind/binaries
+mkdir /project/learn-kind/binaries
+cd /project/learn-kind/binaries
 curl -Lo ./kind-v0.6.1-Linux-amd64 https://github.com/kubernetes-sigs/kind/releases/download/v0.6.1/kind-Linux-amd64
-sudo cp /projects/kind/binaries/kind-v0.6.1-Linux-amd64 /usr/lib/go-1.13/bin/kind
+sudo cp /projects/learn-kind/binaries/kind-v0.6.1-Linux-amd64 /usr/lib/go-1.13/bin/kind
 sudo chmod +x /usr/lib/go-1.13/bin/kind
 
 
@@ -57,8 +58,8 @@ echo " "
 # DO NOT install the altest version, but the version 1.15 which is compliant 
 # with kind (at least this version of kind).
 cd /project/kind/binaries
-curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.16.4/bin/linux/amd64/kubectl
-sudo cp /projects/kind/binaries/kubectl-v1.16.4-linux-amd64 /usr/local/bin/kubectl
+curl -Lo ./kubectl-v1.16.4-linux-amd64 https://storage.googleapis.com/kubernetes-release/release/v1.16.4/bin/linux/amd64/kubectl
+sudo cp /projects/learn-kind/binaries/kubectl-v1.16.4-linux-amd64 /usr/local/bin/kubectl
 sudo chmod +x /usr/local/bin/kubectl
 
 
@@ -78,16 +79,15 @@ echo "================================="
 
 cat <<EOF >> /etc/profile
 
-PATH=$PATH::/usr/lib/go-1.13/bin/
+PATH=$PATH:/usr/lib/go-1.13/bin/
 EOF
+source /etc/profile
 
 echo "================================="
 echo "/etc/profile/ après:"
 cat /etc/profile
 echo "================================="
 
-cd /projects/kind/
+cd /projects/learn-kind/
 
 
-#echo $PATH >> /etc/profile
-source /etc/profile
