@@ -16,21 +16,22 @@ echo "Installing Kubernetes Dashboard"
 echo "==============================="
 
 # retrieve the yaml file with the proper version 
-wget https://raw.githubusercontent.com/kubernetes/dashboard/$VERSION/aio/deploy/recommended.yaml
-mv recommended.yaml dashboard-$(echo $VERSION)-recommended.yaml
+curl -Lo /projects/learn-kind/dashboard-$(echo $VERSION)-recommended.yaml https://raw.githubusercontent.com/kubernetes/dashboard/$VERSION/aio/deploy/recommended.yaml
 
 echo "Installing Kubernetes Dashboard"
-kubectl apply -f dashboard-$(echo $VERSION)-recommended.yaml
+kubectl apply -f /projects/learn-kind/dashboard-$(echo $VERSION)-recommended.yaml
 
 echo "Create sample user with the right to access the dashboard"
-if [ -f dashboard-adminuser.yaml ]
+if [ -f /projects/learn-kind/dashboard-adminuser.yaml ]
 then
-    kubectl apply -f dashboard-adminuser.yaml
+    kubectl apply -f /projects/learn-kind/dashboard-adminuser.yaml
 fi
 
-# Grep the secret and use it to login on the browser
-# --  changed the namespace from kube-system to kubernetes-dashboard
+# Wait 5 seconds to give time for teh dashboard to be deployed and the user to 
+# be created
+sleep 5
 
+# Grep the secret and use it to login on the browser
 echo "Get Token"
 kubectl -n kubernetes-dashboard describe secret "$(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')"
 
